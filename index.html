@@ -1,0 +1,36 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="FIELDI">
+<meta name="theme-color" content="#F2F2F7"><title>FIELDI · 현장 AI 도우미</title>
+<link rel="icon" href="icons/icon-192.png"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/icon-180.png">
+<style>
+html,body{margin:0;height:100%;background:linear-gradient(180deg,#FFFFFF 0%,#F2F2F7 60%,#E5E5EA 100%);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;color:#1C1C1E}
+#gate{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;padding-top:env(safe-area-inset-top)}
+#gate img{width:96px;height:96px;border-radius:22px;box-shadow:0 8px 24px rgba(0,0,0,.12),inset 0 0 0 1px rgba(255,255,255,.6)}
+#gate h1{font-size:28px;letter-spacing:4px;margin:18px 0 2px;background:linear-gradient(180deg,#8E8E93,#3A3A3C);-webkit-background-clip:text;background-clip:text;color:transparent}
+#gate p{margin:0 0 28px;color:#8E8E93;font-size:14px}
+#gf{width:100%;max-width:320px;display:flex;flex-direction:column;gap:12px}
+#gc{font-size:18px;padding:14px 16px;border-radius:14px;border:1px solid #D1D1D6;background:#fff;text-align:center;outline:none;box-shadow:inset 0 1px 2px rgba(0,0,0,.05)}
+#gc:focus{border-color:#8E8E93}
+#gb{font-size:17px;font-weight:600;padding:14px;border-radius:14px;border:0;color:#fff;background:linear-gradient(180deg,#8E8E93,#48484A);box-shadow:0 2px 6px rgba(0,0,0,.15)}
+#gb:disabled{opacity:.6}
+#ge{min-height:20px;color:#FF3B30;font-size:14px;text-align:center}
+</style></head><body><div id="gate" hidden><img src="icons/icon-192.png" alt=""><h1>FIELDI</h1><p>현장 AI 도우미 · 접속 코드를 입력하세요</p>
+<form id="gf" autocomplete="off"><input id="gc" type="password" inputmode="text" placeholder="접속 코드" autocapitalize="off" autocorrect="off" spellcheck="false"><button id="gb" type="submit">열기</button><div id="ge"></div></form></div>
+<script>(()=>{const B=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));let P;
+const idb=()=>new Promise((r,j)=>{const q=indexedDB.open('fieldi-gate',1);q.onupgradeneeded=()=>q.result.createObjectStore('k');q.onsuccess=()=>r(q.result);q.onerror=()=>j(q.error)});
+const op=async(m,f)=>{const d=await idb();return new Promise((r,j)=>{const t=d.transaction('k',m),s=t.objectStore('k'),q=f(s);t.oncomplete=()=>r(q&&q.result);t.onerror=()=>j(t.error)})};
+const getK=()=>op('readonly',s=>s.get('key')),putK=k=>op('readwrite',s=>s.put(k,'key')),delK=()=>op('readwrite',s=>s.delete('key'));
+window.__fieldiGate={forget:delK};
+const load=async()=>{if(!P)P=await (await fetch('payload.json?v=4af5f1ab90e2')).json();return P};
+const dec=async k=>{const p=await load();return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:B(p.iv)},k,B(p.ct))))};
+const derive=async c=>{const p=await load();const m=await crypto.subtle.importKey('raw',new TextEncoder().encode(c.normalize('NFC')),'PBKDF2',false,['deriveKey']);
+ return crypto.subtle.deriveKey({name:'PBKDF2',hash:'SHA-256',salt:B(p.salt),iterations:p.iter},m,{name:'AES-GCM',length:256},false,['decrypt'])};
+const run=a=>{document.getElementById('gate').remove();const st=document.createElement('style');st.textContent=a.css;document.head.appendChild(st);
+ document.body.insertAdjacentHTML('beforeend',a.body);for(const js of a.js){const s=document.createElement('script');s.textContent=js;document.body.appendChild(s)}};
+const show=()=>{const g=document.getElementById('gate');g.hidden=false;const f=document.getElementById('gf'),i=document.getElementById('gc'),b=document.getElementById('gb'),e=document.getElementById('ge');
+ f.onsubmit=async ev=>{ev.preventDefault();const c=i.value.trim();if(!c)return;b.disabled=true;e.textContent='';b.textContent='확인 중…';
+  try{const k=await derive(c);const a=await dec(k);await putK(k);i.value='';run(a)}catch(x){e.textContent=x&&x.name==='OperationError'?'코드가 맞지 않아요':'열 수 없어요: '+(x&&x.message||x);b.disabled=false;b.textContent='열기';i.select()}}};
+if('serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('sw.js').catch(()=>{});
+(async()=>{try{const k=await getK();if(k){try{return run(await dec(k))}catch(x){if(x&&x.name==='OperationError')await delK()}}}catch(x){}show()})();})();</script></body></html>
