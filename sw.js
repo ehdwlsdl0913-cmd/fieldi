@@ -1,5 +1,5 @@
-const CACHE='fieldi-locked-2732f6601150';
-const ASSETS=['./','index.html','payload.json?v=2732f6601150','manifest.webmanifest','vendor/pdfjs/pdf.min.js','vendor/pdfjs/pdf.worker.min.js','icons/icon-180.png','icons/icon-192.png','icons/icon-512.png','icons/logo.png','icons/mark.png'];
+const CACHE='fieldi-locked-c46de3473e0c';
+const ASSETS=['./','index.html','payload.json?v=c46de3473e0c','manifest.webmanifest','vendor/pdfjs/pdf.min.js','vendor/pdfjs/pdf.worker.min.js','icons/icon-180.png','icons/icon-192.png','icons/icon-512.png','icons/logo.png','icons/mark.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(e.request.method!=='GET'||u.origin!==location.origin)return;
